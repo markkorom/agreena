@@ -1,0 +1,39 @@
+version: "3.7"
+
+services:
+  postgres:
+    container_name: agreena
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /.data/postgres
+    volumes:
+      - postgres:/.data/postgres
+    ports:
+      - "5440:5440"
+    command: "-p 5440"
+    networks:
+      - postgres
+
+  pgadmin:
+    container_name: agreena_pg-admin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: postgres@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: postgres
+    volumes:
+      - pgadmin:/.data/pgadmin
+    ports:
+      - "53610:53610"
+      - "80:80"
+    networks:
+      - postgres
+
+networks:
+  postgres:
+    driver: bridge
+
+volumes:
+  postgres:
+  pgadmin:

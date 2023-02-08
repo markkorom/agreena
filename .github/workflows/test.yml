@@ -1,0 +1,29 @@
+name: Test
+
+on: [push]
+
+env:
+  APP_PORT: 3000
+  APP_HOST: http://localhost:3000
+  NODE_ENV: test
+  DB_HOST: localhost
+  DB_PORT: 5440
+  DB_USERNAME: postgres
+  DB_PASSWORD: postgres
+  DB_NAME: postgres
+  SALT_ROUNDS: 10
+  JWT_SECRET: secret
+  JWT_EXPIRES_AT: 10
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - run: docker-compose up -d
+      - uses: actions/setup-node@v3
+      - run: npm ci
+      - run: npm run build
+      - run: npm run migration:run
+      - run: npm run test

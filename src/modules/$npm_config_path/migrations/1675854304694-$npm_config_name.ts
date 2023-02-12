@@ -15,10 +15,10 @@ export class $npmConfigName1675854304694 implements MigrationInterface {
     //   `ALTER TABLE "access_token" ADD CONSTRAINT "FK_9949557d0e1b2c19e5344c171e9" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     // );
     await queryRunner.query(
-      `CREATE TABLE "farm" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "address" character varying NOT NULL, "name" character varying NOT NULL, "size" decimal NOT NULL, "yield" decimal NOT NULL, "coordinates" point NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "userId" uuid, CONSTRAINT "PK_f20f028607b2603deabd8182999" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "farm" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "address" character varying NOT NULL, "name" character varying NOT NULL, "size" decimal NOT NULL, "yield" decimal NOT NULL, "coordinates" float[] NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "userId" uuid, CONSTRAINT "PK_f20f028607b2603deabd8182999" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `ALTER TABLE "farm" ADD CONSTRAINT "FK_9949557d0e1b2c19e5344c17777" FOREIGN KEY ("userId") REFERENCES "user"("id") ON UPDATE NO ACTION`,
+      `ALTER TABLE "farm" ADD CONSTRAINT "FK_9949557d0e1b2c19e5344c17777" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
   }
 

@@ -64,4 +64,16 @@ describe("AuthService", () => {
       });
     });
   });
+
+  describe(".validateAuthHeader", () => {
+    const loginDto: LoginUserDto = { email: "user@jwtvalidation.com", password: "password" };
+    const createUser = async (userDto: CreateUserDto) => usersService.createUser(userDto);
+
+    it("should validate jwt token", async () => {
+      await createUser(loginDto);
+      const { token } = await authService.login(loginDto);
+
+      expect(await authService.validateAuthHeader(`Bearer ${token}`)).toBe(true);
+    })
+  })
 });

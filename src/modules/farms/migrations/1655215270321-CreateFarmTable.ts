@@ -17,7 +17,7 @@ export class CreateFarmTable1655215270321 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE "farm" 
        ADD CONSTRAINT "FK_9949557d0e1b2c19e5344c17777"
-       FOREIGN KEY ("userId") REFERENCES "user"("id") ON UPDATE NO ACTION`,
+       FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
   }
 

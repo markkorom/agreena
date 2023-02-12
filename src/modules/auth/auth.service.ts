@@ -1,7 +1,7 @@
 import * as bcrypt from "bcrypt";
 import config from "config/config";
 import { fromUnixTime } from "date-fns";
-import { UnprocessableEntityError } from "errors/errors";
+import { UnauthorizedError, UnprocessableEntityError } from "errors/errors";
 import { decode, sign } from "jsonwebtoken";
 import { UsersService } from "modules/users/users.service";
 import { Repository } from "typeorm";
@@ -38,7 +38,7 @@ export class AuthService {
       { expiresIn: config.JWT_EXPIRES_AT },
     );
     const tokenExpireDate = this.getJwtTokenExpireDate(token);
-    console.debug("tokenExpireDate: ", tokenExpireDate)
+    console.debug("tokenExpireDate: ", tokenExpireDate);
 
     const newToken = this.accessTokenRepository.create({
       token,
@@ -57,5 +57,26 @@ export class AuthService {
 
   private async validatePassword(password: string, hashedPassword: string): Promise<boolean> {
     return bcrypt.compare(password, hashedPassword);
+  }
+
+  private async validateJwt(jwt: string): Promise<boolean> {
+    const accessToken = await this.getAccessToken(jwt);
+    return accessToken && new Date(accessToken.expiresAt).getTime() > Date.now() ? true : false;
+  }
+
+  public async validateAuthHeader(authHeader: string | undefined): Promise<boolean> {
+    let isValidAuth = false;
+    if (typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {
+      console.debug("VALID Bearer")
+      isValidAuth = await this.validateJwt(authHeader.substring(7, authHeader.length));
+    }
+
+    if (!isValidAuth) throw new UnauthorizedError("Unauthorized user.");
+
+    return isValidAuth;
+  }
+
+  private async getAccessToken(jwt: string): Promise<AccessToken | null> {
+    return this.accessTokenRepository.findOneBy({ token: jwt });
   }
 }

@@ -37,6 +37,7 @@ describe("FarmsController", () => {
     const createFarmDto: CreateFarmDto = { address: "budapest", name: "test", size: 1, yield: 2 };
 
     it("should create new Farm", async () => {
+
       const createdFarm = await farmsService.createFarm(createFarmDto);
       expect(createdFarm).toBeInstanceOf(Farm);
     });

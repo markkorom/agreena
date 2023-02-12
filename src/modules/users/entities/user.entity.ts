@@ -11,6 +11,12 @@ export class User {
   @Column()
   public hashedPassword: string;
 
+  @Column("integer", { array: true }) //Looks a bit hacky to me, but at least it works.
+  public coordinates: number[];
+
+  @Column()
+  public address: string;
+
   @CreateDateColumn()
   public createdAt: Date;
 

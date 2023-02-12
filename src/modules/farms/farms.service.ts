@@ -1,33 +1,50 @@
-import { UnprocessableEntityError } from "errors/errors";
+import { NotFoundError } from "errors/errors";
 import { DeleteResult, FindManyOptions, Repository } from "typeorm";
 import dataSource from "orm/orm.config";
 import { CreateFarmDto } from "./dto/create-farm.dto";
 import { Farm } from "./entities/farm.entity";
-import { getGeocode } from "helpers/utils";
+import { getGeocodeCoordinates } from "helpers/utils";
+import { getDrivingDistances } from "helpers/driving-distance";
+import { GetFarm } from "./dto/get-farm.dto";
+import { UsersService } from "modules/users/users.service";
+import { AccessToken } from "modules/auth/entities/access-token.entity";
 
 export class FarmsService {
   private readonly farmsRepository: Repository<Farm>;
+  private readonly usersService: UsersService;
 
   constructor() {
     this.farmsRepository = dataSource.getRepository(Farm);
+    this.usersService = new UsersService();
   }
 
-  public async createFarm(data: CreateFarmDto): Promise<Farm> {
-    // Get coordinates from GeoCode
-    const geoCode = await getGeocode(data.address);
+  public async createFarm(data: CreateFarmDto, accessToken: AccessToken): Promise<Farm> {
+    const user = await this.usersService.findOneBy({ id: accessToken.user.id });
+    if (!user) throw new NotFoundError("User not found.");
 
-    if (!geoCode || geoCode.length === 0) throw new UnprocessableEntityError("Invalid address. Geo location not found.");
-
-    // Default coordinates, if latitude and longitude are not provided?
-    const coordinates = [geoCode[0].latitude || 0, geoCode[0].longitude || 0];
-
-    const newFarm = this.farmsRepository.create({ ...data, coordinates });
+    const newFarm = this.farmsRepository.create({ ...data, coordinates: await getGeocodeCoordinates(data.address), user });
     return this.farmsRepository.save(newFarm);
   }
 
-  public async findFarms(options?: FindManyOptions<Farm>): Promise<Farm[] | null> {
+  public async findFarms(acessToken: AccessToken, options?: FindManyOptions<Farm>): Promise<GetFarm[] | null> {
+    console.debug(options);
+    const requestUser = await this.usersService.findOneBy({ id: acessToken.user.id });
+    if (!requestUser) throw new NotFoundError("User not exists.");
     // TODO: sorting and filtering options
-    return this.farmsRepository.find(options);
+    const farms = await this.farmsRepository.createQueryBuilder("farm").leftJoinAndSelect("farm.user", "user").getMany();
+    if (farms.length === 0) return [];
+    const farmsCoordinates = farms.map(farm => farm.coordinates);
+    const [, ...drivingDistances] = await getDrivingDistances([requestUser.coordinates, ...farmsCoordinates]);
+    const farmsExtended = [];
+    for (const [i, farm] of farms.entries()) {
+      const {user, ...base} = farm;
+      farmsExtended.push({
+        ...base,
+        owner: farm.user?.email,
+        drivingDistance: drivingDistances[i],
+      });
+    }
+    return farmsExtended;
   }
 
   public async deleteFarm(id: string): Promise<DeleteResult | null> {

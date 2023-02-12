@@ -8,7 +8,9 @@ export class CreateUserTable1655215270565 implements MigrationInterface {
         "email" character varying NOT NULL, 
         "hashedPassword" character varying NOT NULL, 
         "createdAt" TIMESTAMP NOT NULL DEFAULT now(), 
-        "updatedAt" TIMESTAMP DEFAULT now(), 
+        "updatedAt" TIMESTAMP DEFAULT now(),
+        "coordinates" float[] NOT NULL,
+        "address" character varying NOT NULL,
         CONSTRAINT "UQ_e12875dfb3b1d92d7d7c5377e22" UNIQUE ("email"),
         CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id")
       )`,

@@ -1,4 +1,5 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { User } from "modules/users/entities/user.entity";
+import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity()
 export class Farm {
@@ -19,6 +20,9 @@ export class Farm {
 
   @Column("integer", {array: true})  //Looks a bit hacky to me, but at least it works.
   public coordinates: number[];
+
+  @ManyToOne(() => User)
+  public user: User;
 
   @CreateDateColumn()
   public createdAt: Date;

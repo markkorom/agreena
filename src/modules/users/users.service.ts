@@ -5,6 +5,7 @@ import { DeepPartial, FindOptionsWhere, Repository } from "typeorm";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { User } from "./entities/user.entity";
 import dataSource from "orm/orm.config";
+import { getGeocodeCoordinates } from "helpers/utils";
 
 export class UsersService {
   private readonly usersRepository: Repository<User>;
@@ -14,7 +15,7 @@ export class UsersService {
   }
 
   public async createUser(data: CreateUserDto): Promise<User> {
-    const { email, password } = data;
+    const { email, password, address } = data;
 
     const existingUser = await this.findOneBy({ email: email });
     if (existingUser) throw new UnprocessableEntityError("A user for the email already exists");
@@ -23,7 +24,7 @@ export class UsersService {
 
     const userData: DeepPartial<User> = { email, hashedPassword };
 
-    const newUser = this.usersRepository.create(userData);
+    const newUser = this.usersRepository.create({ ...userData, address, coordinates: await getGeocodeCoordinates(address) });
     return this.usersRepository.save(newUser);
   }
 

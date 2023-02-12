@@ -2,6 +2,7 @@ import { DataSource } from "typeorm";
 import { readdirSync } from "fs";
 import path from "path";
 import NodeGeocoder from "node-geocoder";
+import { UnprocessableEntityError } from "errors/errors";
 
 export const disconnectAndClearDatabase = async (ds: DataSource): Promise<void> => {
   const { entityMetadatas } = ds;
@@ -40,6 +41,12 @@ export function getSelectedFilesPathFromFolder(extension = "csv"): File[] {
 }
 
 const geocoder = NodeGeocoder({ provider: "openstreetmap"})
-export async function getGeocode(address: string): Promise<NodeGeocoder.Entry[]> {
-  return geocoder.geocode(address);
+export async function getGeocodeCoordinates(address: string): Promise<number[]> {
+  const geoCode = await geocoder.geocode(address);
+  // Get coordinates from GeoCode
+
+  if (!geoCode || geoCode.length === 0) throw new UnprocessableEntityError("Invalid address. Geo location not found.");
+
+  // Default coordinates, if latitude and longitude are not provided?
+  return [geoCode[0].latitude || 0, geoCode[0].longitude || 0];
 }

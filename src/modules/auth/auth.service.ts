@@ -20,12 +20,10 @@ export class AuthService {
 
   public async login(data: LoginUserDto): Promise<AccessToken> {
     const user = await this.usersService.findOneBy({ email: data.email });
-    console.debug("user: ", user);
 
     if (!user) throw new UnprocessableEntityError("Invalid user email or password");
 
     const isValidPassword = await this.validatePassword(data.password, user.hashedPassword);
-    console.debug("isValid: ", isValidPassword);
 
     if (!isValidPassword) throw new UnprocessableEntityError("Invalid user email or password");
 
@@ -38,7 +36,6 @@ export class AuthService {
       { expiresIn: config.JWT_EXPIRES_AT },
     );
     const tokenExpireDate = this.getJwtTokenExpireDate(token);
-    console.debug("tokenExpireDate: ", tokenExpireDate);
 
     const newToken = this.accessTokenRepository.create({
       token,
@@ -50,7 +47,6 @@ export class AuthService {
   }
 
   private getJwtTokenExpireDate(token: string): number {
-    console.debug("token: ", token);
     const { exp } = decode(token) as { [exp: string]: number };
     return exp;
   }
@@ -59,24 +55,28 @@ export class AuthService {
     return bcrypt.compare(password, hashedPassword);
   }
 
-  private async validateJwt(jwt: string): Promise<boolean> {
-    const accessToken = await this.getAccessToken(jwt);
+  private async validateAccessToken(accessToken: AccessToken | null): Promise<boolean> {
     return accessToken && new Date(accessToken.expiresAt).getTime() > Date.now() ? true : false;
   }
 
-  public async validateAuthHeader(authHeader: string | undefined): Promise<boolean> {
+  public async validateAuthHeader(authHeader: string | undefined): Promise<AccessToken> {
     let isValidAuth = false;
+    let validAccessToken = {} as AccessToken;
     if (typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {
-      console.debug("VALID Bearer")
-      isValidAuth = await this.validateJwt(authHeader.substring(7, authHeader.length));
+      const accessToken = await this.getAccessToken(authHeader.substring(7, authHeader.length));
+      if (accessToken) {
+        validAccessToken = accessToken;
+        isValidAuth = await this.validateAccessToken(accessToken);
+      }
     }
 
     if (!isValidAuth) throw new UnauthorizedError("Unauthorized user.");
 
-    return isValidAuth;
+    return validAccessToken;
   }
 
   private async getAccessToken(jwt: string): Promise<AccessToken | null> {
-    return this.accessTokenRepository.findOneBy({ token: jwt });
+    // return this.accessTokenRepository.findOneBy({ token: jwt });
+    return this.accessTokenRepository.createQueryBuilder("access_token").where({token: jwt}).leftJoinAndSelect("access_token.user", "user").getOne();
   }
 }

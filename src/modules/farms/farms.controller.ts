@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from "express";
 import { CreateFarmDto } from "./dto/create-farm.dto";
-import { FarmDto } from "../auth/dto/farm.dto";
 import { FarmsService } from "./farms.service";
 import { AuthService } from "modules/auth/auth.service";
 
@@ -14,11 +13,10 @@ export class FarmsController {
   }
 
   public async create(req: Request, res: Response, next: NextFunction) {
-    console.debug("Headers: ", req.headers)
     try {
-      await this.authService.validateAuthHeader(req.headers.authorization);
-      const farm = await this.farmsService.createFarm(req.body as CreateFarmDto);
-      res.status(201).send(FarmDto.createFromEntity(farm));
+      const accessToken = await this.authService.validateAuthHeader(req.headers.authorization);
+      const {user, ...farm} = await this.farmsService.createFarm(req.body as CreateFarmDto, accessToken);
+      res.status(201).send(farm);
     } catch (error) {
       next(error);
     }
@@ -34,11 +32,9 @@ export class FarmsController {
    * @param next 
    */
   public async find(req: Request, res: Response, next: NextFunction) {
-    console.debug(req.headers);
-    console.debug();
     try {
-      await this.authService.validateAuthHeader(req.headers.authorization);
-      const farms = await this.farmsService.findFarms(req.body as any);
+      const accessToken = await this.authService.validateAuthHeader(req.headers.authorization);
+      const farms = await this.farmsService.findFarms(accessToken, req.body as any);
       res.status(200).send(farms);
     } catch (error) {
       next(error);
@@ -54,7 +50,7 @@ export class FarmsController {
    */
   public async delete(req: Request, res: Response, next: NextFunction) {
     try {
-      await this.authService.validateAuthHeader(req.headers.authorization);
+      // await this.authService.validateAuthHeader(req.headers.authorization);
       const farm = await this.farmsService.deleteFarm(req.params?.id);
       res.status(200).send(farm);
     } catch (error) {

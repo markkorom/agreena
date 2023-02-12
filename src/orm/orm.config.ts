@@ -5,7 +5,7 @@ const options: DataSourceOptions = {
   type: "postgres",
   entities: ["src/**/**/entities/**/*.ts"],
   synchronize: false,
-  migrations: ["src/**/**/migrations/**/*.ts"],
+  migrations: ["src/modules/farms/migrations/**/*.ts"],
   host: config.DB_HOST,
   port: config.DB_PORT,
   username: config.DB_USERNAME,

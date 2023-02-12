@@ -1,6 +1,7 @@
 import { DataSource } from "typeorm";
 import { readdirSync } from "fs";
 import path from "path";
+import NodeGeocoder from "node-geocoder";
 
 export const disconnectAndClearDatabase = async (ds: DataSource): Promise<void> => {
   const { entityMetadatas } = ds;
@@ -36,4 +37,9 @@ type File = string;
 export function getSelectedFilesPathFromFolder(extension = "csv"): File[] {
   // Folder path could be dynamic here. I think it is good enough for this short exercise.
   return readdirSync(path.join(__dirname, "..", "..", "files")).filter(file => file.endsWith(extension));
+}
+
+const geocoder = NodeGeocoder({ provider: "openstreetmap"})
+export async function getGeocode(address: string): Promise<NodeGeocoder.Entry[]> {
+  return geocoder.geocode(address);
 }

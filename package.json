@@ -25,6 +25,7 @@
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.0",
+    "node-geocoder": "^4.2.0",
     "pg": "^8.8.0",
     "reflect-metadata": "^0.1.13",
     "typeorm": "^0.3.10"
@@ -35,6 +36,7 @@
     "@types/jest": "^29.2.2",
     "@types/jsonwebtoken": "^9.0.0",
     "@types/node": "^18.11.9",
+    "@types/node-geocoder": "^4.2.0",
     "@types/supertest": "^2.0.12",
     "@typescript-eslint/eslint-plugin": "^5.42.1",
     "@typescript-eslint/parser": "^5.42.1",

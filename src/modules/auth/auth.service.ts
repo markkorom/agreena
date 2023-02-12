@@ -20,10 +20,12 @@ export class AuthService {
 
   public async login(data: LoginUserDto): Promise<AccessToken> {
     const user = await this.usersService.findOneBy({ email: data.email });
+    console.debug("user: ", user);
 
     if (!user) throw new UnprocessableEntityError("Invalid user email or password");
 
     const isValidPassword = await this.validatePassword(data.password, user.hashedPassword);
+    console.debug("isValid: ", isValidPassword);
 
     if (!isValidPassword) throw new UnprocessableEntityError("Invalid user email or password");
 
@@ -36,6 +38,7 @@ export class AuthService {
       { expiresIn: config.JWT_EXPIRES_AT },
     );
     const tokenExpireDate = this.getJwtTokenExpireDate(token);
+    console.debug("tokenExpireDate: ", tokenExpireDate)
 
     const newToken = this.accessTokenRepository.create({
       token,
@@ -47,6 +50,7 @@ export class AuthService {
   }
 
   private getJwtTokenExpireDate(token: string): number {
+    console.debug("token: ", token);
     const { exp } = decode(token) as { [exp: string]: number };
     return exp;
   }

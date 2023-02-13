@@ -1,13 +1,15 @@
 import { NotFoundError } from "errors/errors";
-import { DeleteResult, FindManyOptions, Repository } from "typeorm";
+import { DeleteResult, Repository } from "typeorm";
 import dataSource from "orm/orm.config";
 import { CreateFarmDto } from "./dto/create-farm.dto";
 import { Farm } from "./entities/farm.entity";
 import { getGeocodeCoordinates } from "helpers/utils";
 import { getDrivingDistances } from "helpers/driving-distance";
-import { GetFarm } from "./dto/get-farm.dto";
+import { GetFarmDto } from "./dto/get-farm.dto";
 import { UsersService } from "modules/users/users.service";
 import { AccessToken } from "modules/auth/entities/access-token.entity";
+import * as _ from "lodash";
+import { GetFarmQueryDto } from "./dto/get-farm-query.dto";
 
 export class FarmsService {
   private readonly farmsRepository: Repository<Farm>;
@@ -26,8 +28,8 @@ export class FarmsService {
     return this.farmsRepository.save(newFarm);
   }
 
-  public async findFarms(acessToken: AccessToken, options?: FindManyOptions<Farm>): Promise<GetFarm[] | null> {
-    console.debug(options);
+  public async findFarms(acessToken: AccessToken, getFarmQueryDto: GetFarmQueryDto): Promise<GetFarmDto[] | null> {
+    console.debug(getFarmQueryDto);
     const requestUser = await this.usersService.findOneBy({ id: acessToken.user.id });
     if (!requestUser) throw new NotFoundError("User not exists.");
     // TODO: sorting and filtering options
@@ -37,14 +39,14 @@ export class FarmsService {
     const [, ...drivingDistances] = await getDrivingDistances([requestUser.coordinates, ...farmsCoordinates]);
     const farmsExtended = [];
     for (const [i, farm] of farms.entries()) {
-      const {user, ...base} = farm;
+      const { user, ...base } = farm;
       farmsExtended.push({
         ...base,
         owner: farm.user?.email,
         drivingDistance: drivingDistances[i],
       });
     }
-    return farmsExtended;
+    return _.sortBy(farmsExtended, ["nope", "name"]);
   }
 
   public async deleteFarm(id: string): Promise<DeleteResult | null> {

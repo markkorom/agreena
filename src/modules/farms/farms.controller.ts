@@ -2,6 +2,8 @@ import { NextFunction, Request, Response } from "express";
 import { CreateFarmDto } from "./dto/create-farm.dto";
 import { FarmsService } from "./farms.service";
 import { AuthService } from "modules/auth/auth.service";
+import { validateDto } from "helpers/utils";
+import { GetFarmQueryDto } from "./dto/get-farm-query.dto";
 
 export class FarmsController {
   private readonly farmsService: FarmsService;
@@ -34,7 +36,15 @@ export class FarmsController {
   public async find(req: Request, res: Response, next: NextFunction) {
     try {
       const accessToken = await this.authService.validateAuthHeader(req.headers.authorization);
-      const farms = await this.farmsService.findFarms(accessToken, req.body as any);
+
+      const { includeOutliers, sortBy } = req.query as any;
+      const getFarmQueryDto = new GetFarmQueryDto();
+      getFarmQueryDto.includeOutliers = includeOutliers === 'true' ? true : false;
+      getFarmQueryDto.sortBy = sortBy;
+
+      await validateDto(getFarmQueryDto);
+    
+      const farms = await this.farmsService.findFarms(accessToken, getFarmQueryDto as any);
       res.status(200).send(farms);
     } catch (error) {
       next(error);

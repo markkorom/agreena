@@ -1,4 +1,4 @@
-import { NotFoundError, UnauthorizedError, UnprocessableEntityError } from "errors/errors";
+import { BadRequestError, NotFoundError, UnauthorizedError, UnprocessableEntityError } from "errors/errors";
 import { NextFunction, Request, Response } from "express";
 
 export function handleErrorMiddleware(error: Error, _: Request, res: Response, next: NextFunction): void {
@@ -11,8 +11,9 @@ export function handleErrorMiddleware(error: Error, _: Request, res: Response, n
     res.status(401).send({ name: UnauthorizedError.name, message });
   } else if (error instanceof NotFoundError) {
     res.status(404).send({ name: NotFoundError.name, message });
-  }
-  else {
+  } else if (error instanceof BadRequestError) {
+    res.status(400).send({ name: BadRequestError.name, message });
+  } else {
     res.status(500).send({ message: "Internal Server Error" });
   }
 

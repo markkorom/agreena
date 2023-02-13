@@ -2,7 +2,8 @@ import { DataSource } from "typeorm";
 import { readdirSync } from "fs";
 import path from "path";
 import NodeGeocoder from "node-geocoder";
-import { UnprocessableEntityError } from "errors/errors";
+import { BadRequestError, UnprocessableEntityError } from "errors/errors";
+import { validate } from "class-validator";
 
 export const disconnectAndClearDatabase = async (ds: DataSource): Promise<void> => {
   const { entityMetadatas } = ds;
@@ -40,7 +41,7 @@ export function getSelectedFilesPathFromFolder(extension = "csv"): File[] {
   return readdirSync(path.join(__dirname, "..", "..", "files")).filter(file => file.endsWith(extension));
 }
 
-const geocoder = NodeGeocoder({ provider: "openstreetmap"})
+const geocoder = NodeGeocoder({ provider: "openstreetmap" });
 export async function getGeocodeCoordinates(address: string): Promise<number[]> {
   const geoCode = await geocoder.geocode(address);
   // Get coordinates from GeoCode
@@ -49,4 +50,13 @@ export async function getGeocodeCoordinates(address: string): Promise<number[]> 
 
   // Default coordinates, if latitude and longitude are not provided?
   return [geoCode[0].latitude || 0, geoCode[0].longitude || 0];
+}
+
+export async function validateDto(dto: Record<string, any>): Promise<void | never> {
+  const errors = await validate(dto, { validationError: { target: false, value: false }, stopAtFirstError: true });
+  if (errors.length > 0) {
+    // TODO: return nice, generic error messages from constraints
+    const messages = JSON.stringify(errors.map((err) => Object.values(err.constraints || {})))
+    throw new BadRequestError(messages);
+  }
 }

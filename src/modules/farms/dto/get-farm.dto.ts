@@ -1,7 +1,7 @@
 import { IsEmail, IsNotEmpty, IsNumber } from "class-validator";
 import { CreateFarmDto } from "./create-farm.dto";
 
-export class GetFarm extends CreateFarmDto {
+export class GetFarmDto extends CreateFarmDto {
   @IsEmail()
   @IsNotEmpty()
   public owner: string;

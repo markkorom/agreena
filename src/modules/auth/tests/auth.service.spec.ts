@@ -41,7 +41,7 @@ describe("AuthService", () => {
     const createUser = async (userDto: CreateUserDto) => usersService.createUser(userDto);
 
     it("should create access token for existing user", async () => {
-      await createUser(loginDto);
+      await createUser({ ...loginDto, address: "Budapest" });
 
       const { token } = await authService.login(loginDto);
 
@@ -56,7 +56,7 @@ describe("AuthService", () => {
     });
 
     it("should throw UnprocessableEntityError when user logs in with invalid password", async () => {
-      await createUser(loginDto);
+      await createUser({ ...loginDto, address: "Budapest" });
 
       await authService.login({ email: loginDto.email, password: "invalidPassword" }).catch((error: UnprocessableEntityError) => {
         expect(error).toBeInstanceOf(UnprocessableEntityError);
@@ -70,10 +70,10 @@ describe("AuthService", () => {
     const createUser = async (userDto: CreateUserDto) => usersService.createUser(userDto);
 
     it("should validate jwt token", async () => {
-      await createUser(loginDto);
+      await createUser({ ...loginDto, address: "Budapest" });
       const { token } = await authService.login(loginDto);
 
       expect(await authService.validateAuthHeader(`Bearer ${token}`)).toBe(true);
-    })
-  })
+    });
+  });
 });

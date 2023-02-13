@@ -47,9 +47,9 @@ describe("FarmsController", () => {
     const createUser = async (userDto: CreateUserDto) => usersService.createUser(userDto);
 
     it("should create new Farm", async () => {
-      await createUser(loginDto);
+      await createUser({ ...loginDto, address: "Budapest" });
       const { token } = await authService.login(loginDto);
-      const res = await agent.post("/api/farms").auth(token, {type: "bearer"}).send(createFarmDto);
+      const res = await agent.post("/api/farms").auth(token, { type: "bearer" }).send(createFarmDto);
 
       expect(res.statusCode).toBe(201);
       expect(res.body).toMatchObject({
@@ -62,10 +62,10 @@ describe("FarmsController", () => {
     });
 
     it("should throw UnprocessableEntityError if Farm already exists", async () => {
-      await createUser(loginDto);
+      await createUser({ ...loginDto, address: "Budapest" });
       const { token } = await authService.login(loginDto);
 
-      const res = await agent.post("/api/farms").auth(token, {type: "bearer"}).send({});
+      const res = await agent.post("/api/farms").auth(token, { type: "bearer" }).send({});
 
       expect(res.statusCode).toBe(422);
       expect(res.body).toMatchObject({
@@ -75,7 +75,6 @@ describe("FarmsController", () => {
     });
 
     it("should throw UnauthorizedError if Farm already exists", async () => {
-
       const res = await agent.post("/api/farms").send({});
 
       expect(res.statusCode).toBe(401);

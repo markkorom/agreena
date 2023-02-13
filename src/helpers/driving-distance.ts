@@ -17,13 +17,17 @@ interface DestinationInterface {
 }
 
 /**
- * Return unsorted distance array. First element of the array is the starting point. The array keeps the original coordinates order.
- * @param coordinates 
- * @returns 
+ * Return unsorted distance array.
+ * First element of the array is the starting point.
+ * The array keeps the original coordinates order.
+ * @param coordinates
+ * @returns
  */
 export async function getDrivingDistances(coordinates: number[][]): Promise<number[]> {
   try {
-    const response = await axios.get(`${drivingDistanceBaseUrl}/${coordinates.join(";")}?annotations=distance`);
+    const response = await axios.get<{ distances: number[][] }>(
+      `${drivingDistanceBaseUrl}/${coordinates.join(";")}?annotations=distance`,
+    );
     return response.data.distances[0];
   } catch (error) {
     console.debug(error);

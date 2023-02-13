@@ -1,11 +1,12 @@
-import { IsBoolean, IsOptional, IsString } from "class-validator";
+import { IsBoolean, IsEnum, IsOptional } from "class-validator";
+import { Sortby } from "../enums/sort-by.enum";
 
 export class GetFarmQueryDto {
   @IsOptional()
-  @IsString()
-  public sortBy: string;
+  @IsEnum(Sortby)
+  public sortBy: Sortby;
 
   @IsOptional()
   @IsBoolean()
-  public includeOutliers: boolean;
+  public outliers: boolean;
 }

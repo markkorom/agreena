@@ -1,3 +1,4 @@
+import { ColumnNumericTransformer } from "helpers/column-number.transformer";
 import { User } from "modules/users/entities/user.entity";
 import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
@@ -12,17 +13,25 @@ export class Farm {
   @Column()
   public name: string;
 
-  @Column()
+  @Column("numeric", {
+    precision: 7,
+    scale: 2,
+    transformer: new ColumnNumericTransformer(),
+  })
   public size: number;
 
-  @Column()
+  @Column("numeric", {
+    precision: 7,
+    scale: 2,
+    transformer: new ColumnNumericTransformer(),
+  })
   public yield: number;
 
   @Column("integer", {array: true})  //Looks a bit hacky to me, but at least it works.
   public coordinates: number[];
 
   @ManyToOne(() => User)
-  public user: User;
+  public user?: User;
 
   @CreateDateColumn()
   public createdAt: Date;

@@ -55,7 +55,7 @@ export class AuthService {
     return bcrypt.compare(password, hashedPassword);
   }
 
-  private async validateAccessToken(accessToken: AccessToken | null): Promise<boolean> {
+  private validateAccessToken(accessToken: AccessToken | null): boolean {
     return accessToken && new Date(accessToken.expiresAt).getTime() > Date.now() ? true : false;
   }
 
@@ -66,7 +66,7 @@ export class AuthService {
       const accessToken = await this.getAccessToken(authHeader.substring(7, authHeader.length));
       if (accessToken) {
         validAccessToken = accessToken;
-        isValidAuth = await this.validateAccessToken(accessToken);
+        isValidAuth = this.validateAccessToken(accessToken);
       }
     }
 
@@ -76,7 +76,10 @@ export class AuthService {
   }
 
   private async getAccessToken(jwt: string): Promise<AccessToken | null> {
-    // return this.accessTokenRepository.findOneBy({ token: jwt });
-    return this.accessTokenRepository.createQueryBuilder("access_token").where({token: jwt}).leftJoinAndSelect("access_token.user", "user").getOne();
+    return this.accessTokenRepository
+      .createQueryBuilder("access_token")
+      .where({ token: jwt })
+      .leftJoinAndSelect("access_token.user", "user")
+      .getOne();
   }
 }

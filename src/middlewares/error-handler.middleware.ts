@@ -19,15 +19,3 @@ export function handleErrorMiddleware(error: Error, _: Request, res: Response, n
 
   next();
 }
-
-// export async function handleAuthorizationMiddleware(req: Request, _: Response, next: NextFunction) {
-//   const { authorization } = req.headers;
-//   let isValidAuth = false;
-//   if (typeof authorization === "string" && authorization.startsWith("Bearer ")) {
-//     isValidAuth = await authService.validateJwt(authorization.substring(7, authorization.length));
-//   }
-
-//   if (!isValidAuth) throw new UnauthorizedError("Unauthorized user.");
-
-//   next();
-// }

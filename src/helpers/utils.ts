@@ -4,6 +4,8 @@ import path from "path";
 import NodeGeocoder from "node-geocoder";
 import { BadRequestError, UnprocessableEntityError } from "errors/errors";
 import { validate } from "class-validator";
+import { PassportRequest } from "common/passport-request.type";
+import { NextFunction, Response } from "express";
 
 export const disconnectAndClearDatabase = async (ds: DataSource): Promise<void> => {
   const { entityMetadatas } = ds;
@@ -56,7 +58,14 @@ export async function validateDto(dto: Record<string, any>): Promise<void | neve
   const errors = await validate(dto, { validationError: { target: false, value: false }, stopAtFirstError: true });
   if (errors.length > 0) {
     // TODO: return nice, generic error messages from constraints
-    const messages = JSON.stringify(errors.map((err) => Object.values(err.constraints || {})))
+    const messages = JSON.stringify(errors.map(err => Object.values(err.constraints || {})));
     throw new BadRequestError(messages);
   }
 }
+
+// Quick solution to handle async middlewares.
+export const asnycHandler =
+  (handlerFn: (req: PassportRequest, res: Response, next: NextFunction) => Promise<void>) =>
+  (req: PassportRequest, res: Response, next: NextFunction) => {
+    handlerFn(req, res, next).catch(next);
+  };

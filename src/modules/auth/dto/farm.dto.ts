@@ -1,4 +1,4 @@
-import { Expose, Transform } from "class-transformer";
+import { Expose, plainToClass, Transform } from "class-transformer";
 import { Farm } from "../../farms/entities/farm.entity";
 
 export class FarmDto {
@@ -21,9 +21,6 @@ export class FarmDto {
   @Expose()
   public size: number;
 
-  @Expose()
-  public coordinates: number[];
-
   @Transform(({ value }) => (value as Date).toISOString())
   @Expose()
   public createdAt: Date;
@@ -32,11 +29,11 @@ export class FarmDto {
   @Expose()
   public updatedAt: Date;
 
-  public static createFromEntity(Farm: Farm | null): FarmDto | null {
-    if (!Farm) {
+  public static createFromEntity(farm: Farm | null): FarmDto | null {
+    if (!farm) {
       return null;
     }
 
-    return new FarmDto({ ...Farm });
+    return plainToClass(FarmDto, farm, { strategy: "excludeAll" });
   }
 }

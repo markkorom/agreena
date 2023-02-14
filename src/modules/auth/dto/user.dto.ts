@@ -25,6 +25,9 @@ export class UserDto {
       return null;
     }
 
+    // I'd use plainToClass method from class-validator here and 
+    // change strategy to 'excludeAll' to not return initial values such as
+    // hashedPassword and coordinates. What do you think?
     return new UserDto({ ...user });
   }
 }

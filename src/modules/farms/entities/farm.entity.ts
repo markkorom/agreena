@@ -28,7 +28,7 @@ export class Farm {
   })
   public yield: number;
 
-  @Column("integer", {array: true})  //Looks a bit hacky to me, but at least it works.
+  @Column("decimal", {array: true})  //Looks a bit hacky to me, but at least it works.
   public coordinates: number[];
 
   @ManyToOne(() => User)

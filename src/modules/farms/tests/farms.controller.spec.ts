@@ -11,7 +11,6 @@ import { CreateUserDto } from "modules/users/dto/create-user.dto";
 import { UsersService } from "modules/users/users.service";
 import { AuthService } from "modules/auth/auth.service";
 import { FarmsService } from "../farms.service";
-import { User } from "modules/users/entities/user.entity";
 import { GetFarmDto } from "../dto/get-farm.dto";
 
 describe("FarmsController", () => {
@@ -90,10 +89,10 @@ describe("FarmsController", () => {
     });
 
     it("should throw UnprocessableEntityError if Farm already exists", async () => {
-      await createUser({ ...loginDto, address: "Budapest" });
+      const user = await createUser({ ...loginDto, address: "Budapest" });
       const { token } = await authService.login(loginDto);
 
-      await farmsService.createFarm(createFarmDto, {} as User);
+      await farmsService.createFarm(createFarmDto, user);
 
       const res = await agent.post("/api/v1/farms").auth(token, { type: "bearer" }).send(createFarmDto);
 
@@ -147,9 +146,10 @@ describe("FarmsController", () => {
 
     it("should throw ForbiddenError error if user os not the owner of the Farm", async () => {
       const user = await createUser({ ...loginDto, address: "Budapest" });
-      const { token } = await authService.login(loginDto);
+      await createUser({ email: "user2@test.com", password: "password", address: "Budapest" });
+      const { token } = await authService.login({ email: "user2@test.com", password: "password" });
 
-      const farm = await farmsService.createFarm(createFarmDto, { ...user, id: "ededaada-ac67-11ed-afa1-0242ac120002" });
+      const farm = await farmsService.createFarm(createFarmDto, user);
       const res = await agent.delete(`/api/v1/farms/${farm.id}`).auth(token, { type: "bearer" }).send();
 
       expect(res.statusCode).toBe(403);

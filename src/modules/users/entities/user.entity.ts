@@ -11,7 +11,7 @@ export class User {
   @Column()
   public hashedPassword: string;
 
-  @Column("integer", { array: true }) //Looks a bit hacky to me, but at least it works.
+  @Column("decimal", { array: true })
   public coordinates: number[];
 
   @Column()

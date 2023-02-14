@@ -168,9 +168,9 @@ describe("FarmsController", () => {
   });
 
   describe("GET /Farms", () => {
-    const createFarmDto: CreateFarmDto = { address: "budapest", name: "bp", size: 1, yield: 1 };
-    const createFarmDto2: CreateFarmDto = { address: "szeged", name: "szeg", size: 2, yield: 2 };
-    const createFarmDto3: CreateFarmDto = { address: "szolnok", name: "szol", size: 3, yield: 3 };
+    const createFarmDto: CreateFarmDto = { address: "budapest nánási út", name: "bp", size: 1, yield: 1 };
+    const createFarmDto2: CreateFarmDto = { address: "szeged rózsa utca", name: "szeg", size: 2, yield: 2 };
+    const createFarmDto3: CreateFarmDto = { address: "szolnok szérüskert", name: "szol", size: 3, yield: 3 };
     const loginDto: LoginUserDto = { email: "user@test.com", password: "password" };
     const createUser = async (userDto: CreateUserDto) => usersService.createUser(userDto);
 
@@ -229,14 +229,14 @@ describe("FarmsController", () => {
       });
     });
 
-    it("should return all Farms sortedBy name (a to z)", async () => {
+    it("should return all Farms sorted by name (a to z)", async () => {
       const user = await createUser({ ...loginDto, address: "Budapest" });
       const { token } = await authService.login(loginDto);
 
       await farmsService.createFarm(createFarmDto, user);
       await farmsService.createFarm(createFarmDto2, user);
       await farmsService.createFarm(createFarmDto3, user);
-      const res = await agent.get("/api/v1/farms/?sortedBy=name&outliers=true").auth(token, { type: "bearer" }).send();
+      const res = await agent.get("/api/v1/farms/?sortBy=name&outliers=true").auth(token, { type: "bearer" }).send();
 
       expect(res.statusCode).toBe(200);
       const farms = res.body as GetFarmDto[];
@@ -245,20 +245,35 @@ describe("FarmsController", () => {
       expect(farms[2]).toEqual(expect.objectContaining({ name: createFarmDto3.name }));
     });
 
-    it("should return all Farms sortedBy driving distance (closest first)", async () => {
+    it("should return all Farms sorted by driving distance (closest first)", async () => {
       const user = await createUser({ ...loginDto, address: "Budapest" });
       const { token } = await authService.login(loginDto);
 
       await farmsService.createFarm(createFarmDto, user);
       await farmsService.createFarm(createFarmDto2, user);
       await farmsService.createFarm(createFarmDto3, user);
-      const res = await agent.get("/api/v1/farms/?sortedBy=drivingDistance&outliers=true").auth(token, { type: "bearer" }).send();
+      const res = await agent.get("/api/v1/farms/?sortBy=drivingDistance&outliers=true").auth(token, { type: "bearer" }).send();
 
       expect(res.statusCode).toBe(200);
       const farms = res.body as GetFarmDto[];
-      expect(farms[0]).toEqual(expect.objectContaining({ drivingDistance: 0 }));
-      expect(farms[1]).toEqual(expect.objectContaining({ drivingDistance: 715222.2 }));
-      expect(farms[2]).toEqual(expect.objectContaining({ drivingDistance: 839627.7 }));
+      expect(farms[0].drivingDistance).toBeLessThanOrEqual(farms[1].drivingDistance);
+      expect(farms[1].drivingDistance).toBeLessThanOrEqual(farms[2].drivingDistance);
+    }, 30000);
+
+    it("should return all Farms sorted by date (newest first)", async () => {
+      const user = await createUser({ ...loginDto, address: "Budapest" });
+      const { token } = await authService.login(loginDto);
+
+      const farm1 = await farmsService.createFarm(createFarmDto, user);
+      const farm2 = await farmsService.createFarm(createFarmDto2, user);
+      const farm3 = await farmsService.createFarm(createFarmDto3, user);
+      const res = await agent.get("/api/v1/farms/?sortBy=createdAt&outliers=true").auth(token, { type: "bearer" }).send();
+
+      expect(res.statusCode).toBe(200);
+      const farms = res.body as GetFarmDto[];
+      expect(farms[0]).toEqual(expect.objectContaining({ id: farm3.id }));
+      expect(farms[1]).toEqual(expect.objectContaining({ id: farm2.id }));
+      expect(farms[2]).toEqual(expect.objectContaining({ id: farm1.id }));
     }, 30000);
 
     it("should exclude outliers from the list", async () => {
@@ -275,33 +290,5 @@ describe("FarmsController", () => {
       expect(farms.length).toEqual(1);
       expect(farms[0]).toEqual(expect.objectContaining({ yield: 2 }));
     }, 30000);
-
-    // it("should return all Farms sortedBy date (newest first)", async () => {
-    //   const user = await createUser({ ...loginDto, address: "Budapest" });
-    //   const { token } = await authService.login(loginDto);
-
-    //   jest.useFakeTimers();
-    //   const farm1 = await farmsService.createFarm(createFarmDto, user);
-    //   // const farm2 = await farmsService.createFarm(createFarmDto2, user);
-    //   // const farm3 = await farmsService.createFarm(createFarmDto3, user);
-
-    //   let farm2: Farm | undefined;
-    //   let farm3: Farm | undefined;
-    //   await new Promise(() => setTimeout(async () => {
-    //     farm2 = await farmsService.createFarm(createFarmDto2, user);
-    //   }, 1000));
-    //   await new Promise(() => setTimeout(async () => {
-    //     farm3 = await farmsService.createFarm(createFarmDto3, user);
-    //   }, 1000));
-    //   jest.useRealTimers();
-    //   const res = await agent.get("/api/v1/farms/?sortedBy=createdAt&outliers=true").auth(token, { type: "bearer" }).send();
-
-    //   expect(res.statusCode).toBe(200);
-    //   const farms = res.body as GetFarmDto[];
-    //   console.debug(farms);
-    //   expect(farms[0]).toEqual(expect.objectContaining({ id: farm3?.id }));
-    //   expect(farms[1]).toEqual(expect.objectContaining({ id: farm2?.id }));
-    //   expect(farms[2]).toEqual(expect.objectContaining({ id: farm1.id }));
-    // }, 30000);
   });
 });

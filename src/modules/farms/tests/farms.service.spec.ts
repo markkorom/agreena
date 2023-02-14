@@ -124,23 +124,6 @@ describe("FarmsController", () => {
       );
     });
 
-    // it("should return Farms list sorted by name and excluded outliers", async () => {
-    //   await farmsService.createFarm(createFarmDto, user);
-    //   await farmsService.createFarm(createFarmDto2, user);
-    //   await farmsService.createFarm(createFarmDto3, user);
-    //   await farmsService.createFarm(createFarmDto4, user);
-
-    //   const farms = await farmsService.findFarms({ outliers: "false", sortBy: SortByEnum.NAME }, user);
-    //   if (!farms) throw new Error();
-    //   farms.forEach(farm => {
-    //     expect(farm?.yield).toBeLessThan(2 * 1.3);
-    //     expect(farm?.yield).toBeGreaterThan(2 * 0.7);
-    //   });
-    //   expect(farms.length).toBe(2);
-    //   expect(farms[0]).toEqual(expect.objectContaining({ name: createFarmDto4.name }));
-    //   expect(farms[1]).toEqual(expect.objectContaining({ name: createFarmDto2.name }));
-    // }, 30000);
-
     it("should throw NotFoundError", async () => {
       await farmsService.deleteFarm("e6035894-8012-454a-a6c6-2e8c7058ead0", user).catch((error: NotFoundError) => {
         expect(error).toBeInstanceOf(NotFoundError);

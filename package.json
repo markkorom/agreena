@@ -6,6 +6,7 @@
     "build": "tsc",
     "start": "ts-node src/main.ts",
     "seed": "ts-node src/seeds/seed.ts",
+    "exercises": "ts-node code-exercises/exercises.ts",
     "lint": "eslint \"{src, test}/**/*.ts\" --fix",
     "test": "NODE_ENV=test jest --runInBand --verbose --coverage",
     "typeorm": "typeorm-ts-node-commonjs -d src/orm/orm.config.ts",

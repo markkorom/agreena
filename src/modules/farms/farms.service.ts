@@ -61,10 +61,8 @@ export class FarmsService {
       const response = await axios.get<{ distances: number[][] }>(
         this.getOSRMApiUrl([user.coordinates, ...farms.map(farm => farm.coordinates)]),
       );
-      console.log("distances: ", response.data.distances[0]);
       return response.data.distances[0];
     } catch (error: any) {
-      console.error(error);
       if (error instanceof AxiosError) {
         throw new BadRequestError(error.message);
       }

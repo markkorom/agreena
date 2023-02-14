@@ -5,6 +5,8 @@ import axios from "axios";
 import { faker } from "@faker-js/faker";
 import { settlements } from "./hungarian-settlements.const";
 
+const host = process.env.HOST || "http://localhost:3000";
+
 function generateRandomNumber(min: number, max: number): number {
   return Number((Math.random() * (max - min) + min).toFixed(2));
 }
@@ -16,7 +18,7 @@ async function generateRandomFarm(token: string): Promise<void> {
     size: generateRandomNumber(0.5, 1000),
     yield: generateRandomNumber(0.5, 10.0),
   };
-  await axios.post("http://localhost:3000/api/v1/farms", farm, { headers: { Authorization: `Bearer ${token}` } });
+  await axios.post(`${host}/api/v1/farms`, farm, { headers: { Authorization: `Bearer ${token}` } });
 }
 
 async function seed() {
@@ -30,8 +32,8 @@ async function seed() {
     ];
 
     for (const user of users) {
-      await axios.post("http://localhost:3000/api/v1/users", user);
-      const res = await axios.post<{ token: string }>("http://localhost:3000/api/v1/auth/login", user);
+      await axios.post(`${host}/api/v1/users`, user);
+      const res = await axios.post<{ token: string }>(`${host}/api/v1/auth/login`, user);
 
       for (let i = 0; i < 30; i++) {
         await generateRandomFarm(res.data.token);

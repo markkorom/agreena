@@ -104,6 +104,17 @@ _Add API that supports following requirements:_
 
 - Add seed that will create 4 users and 30 farms each.
 
+# Additional Info
+
+### Small code exercises
+- placed in code-exercises/exercises.ts
+- `npm run exercises` command runs the script and check assertions
+
+### Seed Script
+- make sure APP is running.
+- default host is http://localhost:3000. Change it with HOST env variable if needed.
+- `npm run seed` or `HOST=NEW_HOST npm run seed`
+
 <br/>
 <br/>
 <br/>

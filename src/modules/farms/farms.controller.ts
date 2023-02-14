@@ -45,7 +45,6 @@ export class FarmsController {
    */
   public async find(req: PassportRequest, res: Response, next: NextFunction) {
     try {
-      console.debug(req.query);
       const { outliers, sortBy } = req.query as unknown as GetFarmQueryDto;
       const getFarmQueryDto = new GetFarmQueryDto();
       getFarmQueryDto.outliers = outliers;

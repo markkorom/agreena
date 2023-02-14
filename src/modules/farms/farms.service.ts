@@ -6,7 +6,7 @@ import { getGeocodeCoordinates } from "helpers/utils";
 import { GetFarmDto } from "./dto/get-farm.dto";
 import { GetFarmQueryDto } from "./dto/get-farm-query.dto";
 import { sortBy } from "lodash";
-import { Sortby } from "./enums/sort-by.enum";
+import { SortByEnum } from "./enums/sort-by.enum";
 import { User } from "modules/users/entities/user.entity";
 import { ForbiddenError, NotFoundError, UnprocessableEntityError } from "errors/errors";
 import axios from "axios";
@@ -27,7 +27,7 @@ export class FarmsService {
     return this.farmsRepository.save(newFarm);
   }
 
-  public async findOneBy(param: FindOptionsWhere<Farm>): Promise<Farm | null> {
+  private async findOneBy(param: FindOptionsWhere<Farm>): Promise<Farm | null> {
     return this.farmsRepository.findOneBy({ ...param });
   }
 
@@ -39,7 +39,7 @@ export class FarmsService {
     if (getFarmQueryDto.outliers !== "true") extendedFarms = this.excludeOutliers(extendedFarms);
     if (getFarmQueryDto.sortBy) {
       extendedFarms = sortBy(extendedFarms, getFarmQueryDto.sortBy);
-      if (getFarmQueryDto.sortBy === Sortby.DATE) extendedFarms.reverse();
+      if (getFarmQueryDto.sortBy === SortByEnum.DATE) extendedFarms.reverse();
     }
     return extendedFarms.map(farm => GetFarmDto.createFromEntity(farm));
   }

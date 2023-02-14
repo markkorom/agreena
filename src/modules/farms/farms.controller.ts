@@ -5,6 +5,8 @@ import { validateDto } from "helpers/utils";
 import { GetFarmQueryDto } from "./dto/get-farm-query.dto";
 import { PassportRequest } from "common/passport-request.type";
 import { FarmDto } from "modules/auth/dto/farm.dto";
+import { isValidUUIDV4 } from "is-valid-uuid-v4";
+import { BadRequestError } from "errors/errors";
 
 export class FarmsController {
   private readonly farmsService: FarmsService;
@@ -62,7 +64,9 @@ export class FarmsController {
    */
   public async delete(req: PassportRequest, res: Response, next: NextFunction) {
     try {
-      const farm = await this.farmsService.deleteFarm(req.params?.id, req.user);
+      const { id } = req.params;
+      if (!isValidUUIDV4(id)) throw new BadRequestError('Invalid uuid.');
+      const farm = await this.farmsService.deleteFarm(id, req.user);
       res.status(200).send(farm);
     } catch (error) {
       next(error);

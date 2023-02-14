@@ -123,7 +123,18 @@ describe("FarmsController", () => {
       );
     });
 
-    it("should throw NotFound error", async () => {
+    it("should throw BadRequestError", async () => {
+      const user = await createUser({ ...loginDto, address: "Budapest" });
+      const { token } = await authService.login(loginDto);
+
+      await farmsService.createFarm(createFarmDto, user);
+      const res = await agent.delete(`/api/v1/farms/FAKE`).auth(token, { type: "bearer" }).send();
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toMatchObject({ message: "Invalid uuid.", name: "BadRequestError" });
+    });
+
+    it("should throw NotFoundError", async () => {
       const user = await createUser({ ...loginDto, address: "Budapest" });
       const { token } = await authService.login(loginDto);
 

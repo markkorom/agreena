@@ -6,11 +6,12 @@ import http, { Server } from "http";
 import ds from "orm/orm.config";
 import supertest, { SuperAgentTest } from "supertest";
 import { CreateFarmDto } from "../dto/create-farm.dto";
-// import { FarmsService } from "../farms.service";
 import { LoginUserDto } from "modules/auth/dto/login-user.dto";
 import { CreateUserDto } from "modules/users/dto/create-user.dto";
 import { UsersService } from "modules/users/users.service";
 import { AuthService } from "modules/auth/auth.service";
+import { FarmsService } from "../farms.service";
+import { User } from "modules/users/entities/user.entity";
 
 describe("FarmsController", () => {
   let app: Express;
@@ -19,6 +20,7 @@ describe("FarmsController", () => {
 
   let usersService: UsersService;
   let authService: AuthService;
+  let farmsService: FarmsService;
 
   beforeAll(() => {
     app = setupServer();
@@ -35,6 +37,7 @@ describe("FarmsController", () => {
 
     usersService = new UsersService();
     authService = new AuthService();
+    farmsService = new FarmsService();
   });
 
   afterEach(async () => {
@@ -49,7 +52,7 @@ describe("FarmsController", () => {
     it("should create new Farm", async () => {
       await createUser({ ...loginDto, address: "Budapest" });
       const { token } = await authService.login(loginDto);
-      const res = await agent.post("/api/farms").auth(token, { type: "bearer" }).send(createFarmDto);
+      const res = await agent.post("/api/v1/farms").auth(token, { type: "bearer" }).send(createFarmDto);
 
       expect(res.statusCode).toBe(201);
       expect(res.body).toMatchObject({
@@ -61,26 +64,45 @@ describe("FarmsController", () => {
       });
     });
 
-    it("should throw UnprocessableEntityError if Farm already exists", async () => {
+    it("should throw BadRequestError if Dto is not valid", async () => {
       await createUser({ ...loginDto, address: "Budapest" });
       const { token } = await authService.login(loginDto);
 
-      const res = await agent.post("/api/farms").auth(token, { type: "bearer" }).send({});
+      const res = await agent.post("/api/v1/farms").auth(token, { type: "bearer" }).send({});
 
-      expect(res.statusCode).toBe(422);
+      expect(res.statusCode).toBe(400);
       expect(res.body).toMatchObject({
-        name: "UnprocessableEntityError",
-        message: "Invalid address. Geo location not found.",
+        name: "BadRequestError",
+        message:
+          '[["address should not be empty"],["name should not be empty"],["size should not be empty"],["yield should not be empty"]]',
       });
     });
 
-    it("should throw UnauthorizedError if Farm already exists", async () => {
-      const res = await agent.post("/api/farms").send({});
+    it("should throw UnauthorizedError if user auth failed", async () => {
+      const res = await agent.post("/api/v1/farms").send({});
 
       expect(res.statusCode).toBe(401);
       expect(res.body).toMatchObject({
         name: "UnauthorizedError",
         message: "Unauthorized user.",
+      });
+    });
+
+    it("should throw UnprocessableEntityError if Farm already exists", async () => {
+      await createUser({ ...loginDto, address: "Budapest" });
+      const { token } = await authService.login(loginDto);
+
+      await farmsService.createFarm(createFarmDto, {} as User);
+
+      const res = await agent
+        .post("/api/v1/farms")
+        .auth(token, { type: "bearer" })
+        .send(createFarmDto);
+
+      expect(res.statusCode).toBe(422);
+      expect(res.body).toMatchObject({
+        name: "UnprocessableEntityError",
+        message: "A Farm with the same name and address is already exists.",
       });
     });
   });

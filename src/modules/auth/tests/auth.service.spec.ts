@@ -73,7 +73,7 @@ describe("AuthService", () => {
       await createUser({ ...loginDto, address: "Budapest" });
       const { token } = await authService.login(loginDto);
 
-      expect(await authService.validateAuthHeader(`Bearer ${token}`)).toBe(true);
+      expect(await authService.validateAuthHeader(`Bearer ${token}`)).toHaveProperty('token');
     });
   });
 });

@@ -69,3 +69,12 @@ export const asnycHandler =
   (req: PassportRequest, res: Response, next: NextFunction) => {
     handlerFn(req, res, next).catch(next);
   };
+
+export class ColumnNumericTransformer {
+  public to(data: number): number {
+    return data;
+  }
+  public from(data: string): number {
+    return parseFloat(data);
+  }
+}

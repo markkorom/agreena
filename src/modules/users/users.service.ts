@@ -3,8 +3,8 @@ import config from "config/config";
 import { UnprocessableEntityError } from "errors/errors";
 import { DeepPartial, FindOptionsWhere, Repository } from "typeorm";
 import { CreateUserDto } from "./dto/create-user.dto";
-import { User } from "./entities/user.entity";
 import dataSource from "orm/orm.config";
+import { User } from "./entities/user.entity";
 import { getGeocodeCoordinates } from "helpers/utils";
 
 export class UsersService {

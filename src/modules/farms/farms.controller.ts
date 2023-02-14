@@ -45,6 +45,7 @@ export class FarmsController {
    */
   public async find(req: PassportRequest, res: Response, next: NextFunction) {
     try {
+      console.debug(req.query);
       const { outliers, sortBy } = req.query as unknown as GetFarmQueryDto;
       const getFarmQueryDto = new GetFarmQueryDto();
       getFarmQueryDto.outliers = outliers;
@@ -65,7 +66,7 @@ export class FarmsController {
   public async delete(req: PassportRequest, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      if (!isValidUUIDV4(id)) throw new BadRequestError('Invalid uuid.');
+      if (!isValidUUIDV4(id)) throw new BadRequestError("Invalid uuid.");
       const farm = await this.farmsService.deleteFarm(id, req.user);
       res.status(200).send(farm);
     } catch (error) {

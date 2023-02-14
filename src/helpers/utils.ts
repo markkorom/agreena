@@ -51,7 +51,7 @@ export async function getGeocodeCoordinates(address: string): Promise<number[]> 
   if (!geoCode || geoCode.length === 0) throw new UnprocessableEntityError("Invalid address. Geo location not found.");
 
   // Default coordinates, if latitude and longitude are not provided?
-  return [geoCode[0].latitude || 0, geoCode[0].longitude || 0];
+  return [geoCode[0].longitude || 0, geoCode[0].latitude || 0];
 }
 
 export async function validateDto(dto: Record<string, any>): Promise<void | never> {

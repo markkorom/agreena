@@ -8,13 +8,12 @@ import { GetFarmQueryDto } from "./dto/get-farm-query.dto";
 import { sortBy } from "lodash";
 import { SortByEnum } from "./enums/sort-by.enum";
 import { User } from "modules/users/entities/user.entity";
-import { ForbiddenError, NotFoundError, UnprocessableEntityError } from "errors/errors";
-import axios from "axios";
+import { BadRequestError, ForbiddenError, NotFoundError, UnprocessableEntityError } from "errors/errors";
+import axios, { AxiosError } from "axios";
 
 type ExtendedFarm = Farm & { owner: string; drivingDistance: number };
 export class FarmsService {
   private readonly farmsRepository: Repository<Farm>;
-  private readonly drivingDistanceBaseUrl = "http://router.project-osrm.org/table/v1/driving";
 
   constructor() {
     this.farmsRepository = dataSource.getRepository(Farm);
@@ -58,12 +57,24 @@ export class FarmsService {
    * The array keeps the original coordinates order.
    */
   private async getDrivingDistances(user: User, farms: Farm[]): Promise<number[]> {
-    const response = await axios.get<{ distances: number[][] }>(
-      `${this.drivingDistanceBaseUrl}/${[user.coordinates, ...farms.map(farm => farm.coordinates)].join(
-        ";",
-      )}?annotations=distance`,
-    );
-    return response.data.distances[0];
+    try {
+      const response = await axios.get<{ distances: number[][] }>(
+        this.getOSRMApiUrl([user.coordinates, ...farms.map(farm => farm.coordinates)]),
+      );
+      console.log("distances: ", response.data.distances[0]);
+      return response.data.distances[0];
+    } catch (error: any) {
+      console.error(error);
+      if (error instanceof AxiosError) {
+        throw new BadRequestError(error.message);
+      }
+      throw new Error((error as Error).message);
+    }
+  }
+  private getOSRMApiUrl(coordinates: number[][]) {
+    return `http://router.project-osrm.org/table/v1/driving/${coordinates.join(
+      ";",
+    )}?sources=0&annotations=distance&skip_waypoints=true`;
   }
 
   private async getGetExtendedFarms(user: User, farms: Farm[]): Promise<ExtendedFarm[]> {

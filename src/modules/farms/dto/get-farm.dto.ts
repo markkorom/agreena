@@ -24,6 +24,6 @@ export class GetFarmDto extends FarmDto {
       return null;
     }
 
-    return plainToClass(GetFarmDto, farm, { strategy: 'excludeAll' });
+    return plainToClass(GetFarmDto, farm, { strategy: "excludeAll" });
   }
 }

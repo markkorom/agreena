@@ -62,7 +62,7 @@ export class FarmsController {
    */
   public async delete(req: PassportRequest, res: Response, next: NextFunction) {
     try {
-      const farm = await this.farmsService.deleteFarm(req.params?.id);
+      const farm = await this.farmsService.deleteFarm(req.params?.id, req.user);
       res.status(200).send(farm);
     } catch (error) {
       next(error);

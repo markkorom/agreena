@@ -34,6 +34,9 @@ export class Farm {
   @ManyToOne(() => User)
   public user?: User;
 
+  @Column()
+  public userId?: string;
+
   @CreateDateColumn()
   public createdAt: Date;
 

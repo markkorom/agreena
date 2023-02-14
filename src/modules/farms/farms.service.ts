@@ -1,4 +1,4 @@
-import { DeleteResult, FindOptionsWhere, Repository } from "typeorm";
+import { FindOptionsWhere, Repository } from "typeorm";
 import dataSource from "orm/orm.config";
 import { CreateFarmDto } from "./dto/create-farm.dto";
 import { Farm } from "./entities/farm.entity";
@@ -8,7 +8,7 @@ import { GetFarmQueryDto } from "./dto/get-farm-query.dto";
 import { sortBy } from "lodash";
 import { Sortby } from "./enums/sort-by.enum";
 import { User } from "modules/users/entities/user.entity";
-import { NotFoundError, UnprocessableEntityError } from "errors/errors";
+import { ForbiddenError, NotFoundError, UnprocessableEntityError } from "errors/errors";
 import axios from "axios";
 
 type ExtendedFarm = Farm & { owner: string; drivingDistance: number };
@@ -44,15 +44,19 @@ export class FarmsService {
     return extendedFarms.map(farm => GetFarmDto.createFromEntity(farm));
   }
 
-  public async deleteFarm(id: string): Promise<DeleteResult | null> {
-    return this.farmsRepository.delete(id);
+  public async deleteFarm(id: string, user: User): Promise<Farm> {
+    const farm = await this.findOneBy({ id });
+    if (!farm) throw new NotFoundError("Farm not found.");
+    if (farm.userId !== user.id) throw new ForbiddenError("User is not the owner of the Farm.");
+
+    return this.farmsRepository.remove(farm);
   }
 
   /**
- * Return unsorted distance array.
- * First element of the array is the starting point.
- * The array keeps the original coordinates order.
- */
+   * Return unsorted distance array.
+   * First element of the array is the starting point.
+   * The array keeps the original coordinates order.
+   */
   private async getDrivingDistances(user: User, farms: Farm[]): Promise<number[]> {
     const response = await axios.get<{ distances: number[][] }>(
       `${this.drivingDistanceBaseUrl}/${[user.coordinates, ...farms.map(farm => farm.coordinates)].join(

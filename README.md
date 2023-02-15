@@ -110,14 +110,11 @@ _Add API that supports following requirements:_
 - placed in code-exercises/exercises.ts
 - `npm run exercises` command runs the script and check assertions
 
-### Run migration
-- Change orm/orm.config.ts options.migrations[0] value to `src/**/$npm_config_path/migrations/**/*.t` and run migration script `npm run migration:run`.
-
 ### Seed Script
 - make sure APP is running.
 - default host is http://localhost:3000. Change it with HOST env variable if needed.
 - `npm run seed` or `HOST=NEW_HOST npm run seed`
-- You can find test user credentials in src/seeds/seed.ts file
+- You can find test users' credentials in src/seeds/seed.ts file
 
 <br/>
 <br/>

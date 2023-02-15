@@ -17,6 +17,7 @@ export class FarmsController {
 
   /**
    * Authenticated route. Create new farm entity in DB.
+   * @body CreateFarmDto
    */
   public async create(req: PassportRequest, res: Response, next: NextFunction) {
     try {
@@ -41,7 +42,7 @@ export class FarmsController {
    * The List can be sorted by name (a to z), date** (newest first), driving distance (closest first).
    * The list can be filtered by outliers (boolean).
    * outliers: the yield of a farm is 30% below or above the average yield of all farms.
-   * **createdAt
+   * @query GetFarmQueryDto
    */
   public async find(req: PassportRequest, res: Response, next: NextFunction) {
     try {
@@ -61,6 +62,7 @@ export class FarmsController {
 
   /**
    * Authenticated route. Delete a farm entity.
+   * @param id - uuid
    */
   public async delete(req: PassportRequest, res: Response, next: NextFunction) {
     try {
